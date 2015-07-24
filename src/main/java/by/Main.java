@@ -44,7 +44,7 @@ public class Main
 					{
 						entity.setPoints(0);
 						Collection<ProductAttributeEntity> attributes = entity.getProductAttributes();
-						List<String> articleAttributes = attributes.stream().filter(item -> item.getAttributeId().equals(13) && item.getLanguageId().equals(1)).map(ProductAttributeEntity :: getText).collect(Collectors.toList());
+						List<String> articleAttributes = attributes.stream().filter(item -> item.getAttribute().getAttributeId().equals(13) && item.getLanguageId().equals(1)).map(ProductAttributeEntity :: getText).collect(Collectors.toList());
 						for (String article : articleAttributes)
 						{
 							for(Product product : products)

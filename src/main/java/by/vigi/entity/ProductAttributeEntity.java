@@ -63,8 +63,9 @@ public class ProductAttributeEntity
 		this.text = text;
 	}
 
+	//@AttributeOverride(name = "attributeId", column = @Column(name = "attribute_id"))
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "attributeProducts", referencedColumnName = "attribute_id")
+	@JoinColumn(name = "attribute_id", nullable = false, updatable = false, insertable = false)
 	public AttributeEntity getAttribute()
 	{
 		return attribute;
