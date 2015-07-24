@@ -64,7 +64,7 @@ public class ProductAttributeEntity
 	}
 
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "attribute_id")
+	@JoinColumn(name = "attributeProducts", referencedColumnName = "attribute_id")
 	public AttributeEntity getAttribute()
 	{
 		return attribute;
