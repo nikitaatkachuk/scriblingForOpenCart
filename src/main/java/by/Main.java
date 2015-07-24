@@ -3,6 +3,7 @@ package by;
 import by.vigi.entity.*;
 import by.vigi.service.CategoryService;
 import by.vigi.service.ProductService;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,6 +14,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -20,8 +22,18 @@ import java.util.stream.Collectors;
  */
 public class Main
 {
+	/**
+	 * Entry point for start parsing. Will called from sh/bat scripts
+	 * Argument parameters can be added later.
+	 * @param args
+	 */
 	public static void main(String[] args)
 	{
+		ConcurrentHashMap<String,Collection<Product>> mainProductCollection;
+		if(args.length > 2)
+		{
+			//TODO: add functional for copy
+		}
 		try
 		{
 			Map<String, String> category2Link = parseCategoryLinks();
@@ -64,6 +76,11 @@ public class Main
 				{
 					category = categoryService.createCategory(categoryName);
 				}
+				
+				List<Product> newProducts = products.stream().filter(product -> !product.isAlreadyUsed()).collect(Collectors.toList());
+				startImportNewProducts(newProducts, category, productService);
+				
+				//TODO: add creating new products
 
 				//for (Product product : products){}
 			}
@@ -74,6 +91,17 @@ public class Main
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private static void startImportNewProducts(List<Product> newProducts,
+			CategoryEntity category, ProductService productService) 
+	{
+		for(Product product : newProducts)
+		{
+			ProductEntity productEntity = productService.createNewProductEntity();
+			
+		}
+		
 	}
 
 	private static Map<String, String> parseCategoryLinks() throws IOException

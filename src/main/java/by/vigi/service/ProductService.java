@@ -111,6 +111,7 @@ public class ProductService
 		result.setCategories(new ArrayList<CategoryEntity>());
 		result.setProductDescriptions(new ArrayList<ProductDescriptionEntity>());
 		result.setProductAttributes(new HashSet<ProductAttributeEntity>());
+		result = productDao.create(result);
 		return result;
 	}
 

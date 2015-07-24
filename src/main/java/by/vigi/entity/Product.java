@@ -10,6 +10,7 @@ public class Product
 	private String article;
 	private String cost;
 	private String attributes;
+	private String url;
 	private boolean alreadyUsed;
 
 	public Product()
@@ -74,7 +75,17 @@ public class Product
 	{
 		this.attributes = attributes;
 	}
-
+	
+	public void setUrl(String url)
+	{
+		this.url = url;
+	}
+	
+	public String  getUrl()
+	{
+		return url;
+	}
+	
 	public boolean isAlreadyUsed()
 	{
 		return alreadyUsed;
