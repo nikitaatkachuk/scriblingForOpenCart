@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:component-scan base-package="by"/>
+
+	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="persistenceXmlLocation" value="classpath:/META-INF/persistence.xml" />
+		<property name="persistenceUnitName" value="toOpenCartDataBasePersistanceUnit"/>
+		<property name="jpaVendorAdapter" ref="jpaVendor"/>
+	</bean>
+
+	<bean id="jpaVendor" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="showSql" value="false"/>
+	</bean>
+
+	<bean id="entityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="entityManagerInterface" value="org.hibernate.jpa.HibernateEntityManager"/>
+	</bean>
+
+	<bean id="dataSource"
+	      class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="url" value="jdbc:mysql://localhost:3306/vigiby_opencart"/>
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="username" value="mysql"/>
+		<property name="password" value="mysql"/>
+	</bean>
+
+	<bean id="sessionFactory"
+	      class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+	<bean id="categoryDao" class="by.vigi.dao.impl.CategoryDao">
+		<!--<property name="entityManagerFactory" value="entityManagerFactory"/>-->
+	</bean>
+
+	<bean id="productDao" class="by.vigi.dao.impl.ProductDao">
+		<!--<property name="entityManagerFactory" value="entityManagerFactory"/>-->
+	</bean>
+
+	<bean id="productDescriptionDao" class="by.vigi.dao.impl.ProductDescriptionDao">
+		<!--<property name="entityManagerFactory" value="entityManagerFactory"/>-->
+	</bean>
+
+	<bean id="categoryDescriptionDao" class="by.vigi.dao.impl.CategoryDescriptionDao">
+		<!--<property name="entityManagerFactory" value="entityManagerFactory"/>-->
+	</bean>
+
+	<bean id="categoryService" class="by.vigi.service.CategoryService">
+		<property name="categoryDao" ref="categoryDao"/>
+		<property name="categoryDescriptionDao" ref="categoryDescriptionDao"/>
+	</bean>
+
+	<bean id="productService" class="by.vigi.service.ProductService">
+		<property name="productDao" ref="productDao"/>
+		<property name="productDescriptionDao" ref="productDescriptionDao"/>
+		<property name="categoryService" ref="categoryService"/>
+	</bean>
+
+</beans>
