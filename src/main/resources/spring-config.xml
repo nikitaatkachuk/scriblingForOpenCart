@@ -44,7 +44,6 @@
 	<tx:annotation-driven transaction-manager="transactionManager"/>
 
 	<bean id="categoryDao" class="by.vigi.dao.impl.CategoryDao">
-		<!--<property name="entityManagerFactory" value="entityManagerFactory"/>-->
 	</bean>
 
 	<bean id="productDao" class="by.vigi.dao.impl.ProductDao">
@@ -58,10 +57,21 @@
 	<bean id="categoryDescriptionDao" class="by.vigi.dao.impl.CategoryDescriptionDao">
 		<!--<property name="entityManagerFactory" value="entityManagerFactory"/>-->
 	</bean>
+	
+	<bean id="attributeDao" class="by.vigi.dao.impl.AttributeDao">
+	</bean>
 
-	<bean id="categoryService" class="by.vigi.service.CategoryService">
+	<bean id="attributeDescriptionDao" class="by.vigi.dao.impl.AttributeDescriptionDao">
+	</bean>
+	
+	<bean id="attributeService" class="by.vigi.service.AttributeService">
 		<property name="categoryDao" ref="categoryDao"/>
 		<property name="categoryDescriptionDao" ref="categoryDescriptionDao"/>
+	</bean>
+	
+	<bean id="categoryService" class="by.vigi.service.CategoryService">
+		<property name="attributeDao" ref="attributeDao"/>
+		<property name="attributeDescriptionDao" ref="attributeDescriptionDao"/>
 	</bean>
 
 	<bean id="productService" class="by.vigi.service.ProductService">

@@ -1,8 +1,7 @@
 package by;
 
 import by.vigi.entity.*;
-import by.vigi.service.CategoryService;
-import by.vigi.service.ProductService;
+import by.vigi.service.*;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,6 +21,8 @@ import java.util.stream.Collectors;
  */
 public class Main
 {
+	public static final int RUSSAIN_LANGUAGE_ID = 1;
+
 	/**
 	 * Entry point for start parsing. Will called from sh/bat scripts
 	 * Argument parameters can be added later.
@@ -56,7 +57,7 @@ public class Main
 					{
 						entity.setPoints(0);
 						Collection<ProductAttributeEntity> attributes = entity.getProductAttributes();
-						List<String> articleAttributes = attributes.stream().filter(item -> item.getAttribute().getAttributeId().equals(13) && item.getLanguageId().equals(1)).map(ProductAttributeEntity :: getText).collect(Collectors.toList());
+						List<String> articleAttributes = attributes.stream().filter(item -> item.getAttribute().getAttributeId().equals(13) && item.getLanguageId().equals(RUSSAIN_LANGUAGE_ID)).map(ProductAttributeEntity :: getText).collect(Collectors.toList());
 						for (String article : articleAttributes)
 						{
 							for(Product product : products)
@@ -78,13 +79,12 @@ public class Main
 				}
 				
 				List<Product> newProducts = products.stream().filter(product -> !product.isAlreadyUsed()).collect(Collectors.toList());
-				startImportNewProducts(newProducts, category, productService);
+				startImportNewProducts(newProducts, category, productService , false);
 				
 				//TODO: add creating new products
 
 				//for (Product product : products){}
 			}
-			System.out.println(category2Product);
 
 		}
 		catch (IOException e)
@@ -94,12 +94,33 @@ public class Main
 	}
 
 	private static void startImportNewProducts(List<Product> newProducts,
-			CategoryEntity category, ProductService productService) 
+			CategoryEntity category, ProductService productService, boolean imageWiilBeUploaded) 
 	{
 		for(Product product : newProducts)
 		{
 			ProductEntity productEntity = productService.createNewProductEntity();
+			//Add description entity
+			ProductDescriptionEntity productDescriptionEntity = new ProductDescriptionEntity();
+			productDescriptionEntity.setProductId(productEntity.getProductId());
+			productDescriptionEntity.setLanguageId(RUSSAIN_LANGUAGE_ID);
+			productEntity.getProductDescriptions().add(productDescriptionEntity);
 			
+			//find attributes to insert
+			//TODO: use spring 
+			AttributeService attributeSevrice = new AttributeService();
+			Collection<AttributeEntity> attributesByLanguageId = attributeSevrice.findByLanguageId(RUSSAIN_LANGUAGE_ID);
+			for(AttributeEntity attribute : attributesByLanguageId)
+			{
+				
+			}
+			
+			//Add product attributes 
+			ProductAttributeEntity productAttributeEntity = new ProductAttributeEntity();
+			productAttributeEntity.setLanguageId(RUSSAIN_LANGUAGE_ID);
+			productAttributeEntity.setText(text);
+			
+			//Add attribute entity
+			//AttributeEntity attributeEntity = new AttributeEntity();
 		}
 		
 	}
