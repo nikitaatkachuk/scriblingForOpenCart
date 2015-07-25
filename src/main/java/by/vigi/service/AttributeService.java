@@ -23,7 +23,7 @@ public class AttributeService
 	
 	public Collection<AttributeEntity> findByLanguageId(Integer id)
 	{
-		//TODO: impl this shit
+		
 	}
 	
 	public AttributeEntity findAttributeEntityById(Integer id)
