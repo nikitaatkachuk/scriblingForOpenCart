@@ -105,6 +105,7 @@ public class Product
 				", article='" + article + '\'' +
 				", cost='" + cost + '\'' +
 				", attributes='" + attributes + '\'' +
+				", url=" + url + '\'' +
 				'}';
 	}
 }

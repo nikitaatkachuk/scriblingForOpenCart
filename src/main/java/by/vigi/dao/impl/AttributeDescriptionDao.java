@@ -25,16 +25,11 @@ public class AttributeDescriptionDao extends GenericDaoImpl<AttributeDescription
 	public List<AttributeDescriptionEntity> findByLanguageId(Integer languageId)
 	{
 		CriteriaBuilder criteriaBuilder = getEntityManager().getCriteriaBuilder();
-		CriteriaQuery<AttributeDescriptionEntity> criteriaQuery = criteriaBuilder.createQuery(CategoryDescriptionEntity.class);
+		CriteriaQuery<AttributeDescriptionEntity> criteriaQuery = criteriaBuilder.createQuery(AttributeDescriptionEntity.class);
 		Root<AttributeDescriptionEntity> root = criteriaQuery.from(AttributeDescriptionEntity.class);
-		criteriaQuery.select(root).where(criteriaBuilder.like(root.<String>get("name"), "%" + name + "%"));
+		criteriaQuery.select(root).where(criteriaBuilder.equal(root.<String>get("languageId"), languageId));
 		Query query = getEntityManager().createQuery(criteriaQuery);
-		List<CategoryDescriptionEntity> resultList = query.getResultList();
-		if(!resultList.isEmpty())
-		{
-			return resultList.get(0);
-		}
-		return null;
+		return query.getResultList();
 
 	}
 }

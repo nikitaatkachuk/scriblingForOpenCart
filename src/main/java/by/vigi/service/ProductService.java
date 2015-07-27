@@ -3,7 +3,9 @@ package by.vigi.service;
 import by.vigi.dao.impl.ProductDao;
 import by.vigi.dao.impl.ProductDescriptionDao;
 import by.vigi.entity.*;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -16,6 +18,7 @@ import java.util.HashSet;
  * Created by Nikita Tkachuk
  */
 
+@Transactional
 public class ProductService
 {
 	private ProductDao productDao;
@@ -96,6 +99,7 @@ public class ProductService
 		result.setTaxClassId(0);
 		result.setDateAvailable(new Date(System.currentTimeMillis()));
 		result.setWeight(zeroBigDec);
+		result.setUpc(emptyString);
 		result.setWeightClassId(0);
 		result.setLength(zeroBigDec);
 		result.setWidth(zeroBigDec);
@@ -112,6 +116,10 @@ public class ProductService
 		result.setProductDescriptions(new ArrayList<ProductDescriptionEntity>());
 		result.setProductAttributes(new HashSet<ProductAttributeEntity>());
 		result = productDao.create(result);
+		Query query = getProductDao().getEntityManager().createNamedQuery("linkToStore");
+		query.setParameter(1, result.getProductId());
+		query.setParameter(2, 0);
+		query.executeUpdate();
 		return result;
 	}
 

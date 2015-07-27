@@ -180,7 +180,7 @@ public class CategoryEntity
 		this.categoryDescription = categoryDescription;
 	}
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(name = "product_to_category", joinColumns = @JoinColumn(name = "category_id"),
 			inverseJoinColumns = @JoinColumn(name = "product_id"))
 	@Fetch(FetchMode.SELECT)

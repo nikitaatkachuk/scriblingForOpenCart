@@ -14,6 +14,7 @@ import java.util.Set;
  * Created by Nikita Tkachuk
  */
 @Entity
+@NamedNativeQuery(name = "linkToStore", query = "INSERT INTO product_to_store VALUES (?,?)")
 @javax.persistence.Table(name = "product", schema = "", catalog = "vigiby_opencart")
 public class ProductEntity
 {
@@ -22,6 +23,7 @@ public class ProductEntity
 
 	@Id
 	@javax.persistence.Column(name = "product_id")
+	@GeneratedValue
 	public Integer getProductId()
 	{
 		return productId;
@@ -451,7 +453,7 @@ public class ProductEntity
 
 	private Set<ProductAttributeEntity> productAttributes;
 
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "product_id")
 	@Fetch(FetchMode.SELECT)
 	public Set<ProductAttributeEntity> getProductAttributes()
@@ -466,7 +468,7 @@ public class ProductEntity
 
 	private Collection<ProductDescriptionEntity> productDescriptions;
 
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "product_id")
 	@Fetch(FetchMode.SELECT)
 	public Collection<ProductDescriptionEntity> getProductDescriptions()

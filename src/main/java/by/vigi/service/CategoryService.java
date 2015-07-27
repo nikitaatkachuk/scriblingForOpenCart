@@ -1,5 +1,6 @@
 package by.vigi.service;
 
+import by.vigi.entity.ProductEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import by.vigi.dao.impl.CategoryDao;
@@ -44,6 +45,11 @@ public class CategoryService
 	{
 	}
 
+	public CategoryEntity updateCategory(CategoryEntity categoryEntity)
+	{
+		return categoryDao.update(categoryEntity);
+	}
+
 	public CategoryEntity findCategoryByName(String name)
 	{
 		CategoryDescriptionEntity description = categoryDescriptionDao.findCategoryDescriptionByName(name);
@@ -80,6 +86,8 @@ public class CategoryService
 		categoryEntity.setTop(false);
 		categoryEntity.setSortOrder(0);
 		Collection<CategoryDescriptionEntity> categoryDescriptionEntityCollection = new ArrayList<>();
+		Collection<ProductEntity> categoryProducts = new ArrayList<>();
+		categoryEntity.setCategoryProducts(categoryProducts);
 		categoryEntity.setCategoryDescription(categoryDescriptionEntityCollection);
 		categoryEntity = categoryDao.create(categoryEntity);
 		categoryDescriptionEntityCollection.add(descriptionEntity);

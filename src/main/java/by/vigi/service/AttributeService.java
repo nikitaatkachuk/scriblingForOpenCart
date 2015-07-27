@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import by.vigi.dao.impl.AttributeDao;
 import by.vigi.dao.impl.AttributeDescriptionDao;
+import by.vigi.entity.AttributeDescriptionEntity;
 import by.vigi.entity.AttributeEntity;
 
 /**
@@ -14,22 +15,21 @@ public class AttributeService
 	private AttributeDao attributeDao;
 	private AttributeDescriptionDao attributeDescriptionDao;
 	
-	
-	
 	public Collection<AttributeEntity> findAll()
 	{
-		//TODO: impl this shit
+		return attributeDao.findAll();
 	}
 	
-	public Collection<AttributeEntity> findByLanguageId(Integer id)
-	{
-		
-	}
+//	public Collection<AttributeEntity> findByLanguageId(Integer id)
+//	{
+//		Collection<AttributeDescriptionEntity> attributeDescriptionEntityCollection = attributeDescriptionDao.findByLanguageId(id);
+//
+//	}
 	
-	public AttributeEntity findAttributeEntityById(Integer id)
-	{
-		
-	}
+//	public AttributeEntity findAttributeEntityById(Integer id)
+//	{
+//
+//	}
 	
 	public AttributeDao getAttributeDao() 
 	{
