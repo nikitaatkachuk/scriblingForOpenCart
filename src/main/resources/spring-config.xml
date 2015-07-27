@@ -26,10 +26,10 @@
 
 	<bean id="dataSource"
 	      class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="url" value="jdbc:mysql://localhost:3306/vigiby_opencart"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/vigiby_opencart?useUnicode=yes&amp;characterEncoding=UTF-8"/>
 		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-		<property name="username" value="mysql"/>
-		<property name="password" value="mysql"/>
+		<property name="username" value="vigiby"/>
+		<property name="password" value="Wae3Shu9"/>
 	</bean>
 
 	<bean id="sessionFactory"
@@ -65,13 +65,13 @@
 	</bean>
 	
 	<bean id="attributeService" class="by.vigi.service.AttributeService">
-		<property name="categoryDao" ref="categoryDao"/>
-		<property name="categoryDescriptionDao" ref="categoryDescriptionDao"/>
+		<property name="attributeDao" ref="attributeDao"/>
+		<property name="attributeDescriptionDao" ref="attributeDescriptionDao"/>
 	</bean>
 	
 	<bean id="categoryService" class="by.vigi.service.CategoryService">
-		<property name="attributeDao" ref="attributeDao"/>
-		<property name="attributeDescriptionDao" ref="attributeDescriptionDao"/>
+		<property name="categoryDao" ref="categoryDao"/>
+		<property name="categoryDescriptionDao" ref="categoryDescriptionDao"/>
 	</bean>
 
 	<bean id="productService" class="by.vigi.service.ProductService">
