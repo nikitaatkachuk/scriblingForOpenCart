@@ -10,6 +10,8 @@ public class Product
 	private String article;
 	private String cost;
 	private String attributes;
+	private String metaKeyword;
+	private String metaDescription;
 	private String url;
 	private boolean alreadyUsed;
 
@@ -75,7 +77,27 @@ public class Product
 	{
 		this.attributes = attributes;
 	}
-	
+
+	public String getMetaKeyword()
+	{
+		return metaKeyword;
+	}
+
+	public void setMetaKeyword(String metaKeyword)
+	{
+		this.metaKeyword = metaKeyword;
+	}
+
+	public String getMetaDescription()
+	{
+		return metaDescription;
+	}
+
+	public void setMetaDescription(String metaDescription)
+	{
+		this.metaDescription = metaDescription;
+	}
+
 	public void setUrl(String url)
 	{
 		this.url = url;
@@ -105,7 +127,10 @@ public class Product
 				", article='" + article + '\'' +
 				", cost='" + cost + '\'' +
 				", attributes='" + attributes + '\'' +
-				", url=" + url + '\'' +
+				", metaKeyword='" + metaKeyword + '\'' +
+				", metaDescription='" + metaDescription + '\'' +
+				", url='" + url + '\'' +
+				", alreadyUsed=" + alreadyUsed +
 				'}';
 	}
 }

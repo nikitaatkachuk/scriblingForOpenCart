@@ -90,10 +90,14 @@ public abstract class GenericScriblingWorker implements Runnable
 	}
 
 
-	protected void startImportNewProducts(List<Product> newProducts, CategoryEntity category, ProductService productService, CategoryService categoryService, boolean imageWillBeDownloaded)
+	protected synchronized void startImportNewProducts(List<Product> newProducts, CategoryEntity category, ProductService productService, CategoryService categoryService, boolean imageWillBeDownloaded)
 	{
 		for (Product product : newProducts)
 		{
+			if(product.getArticle() == null)
+			{
+				continue;
+			}
 			ProductEntity productEntity = productService.createNewProductEntity();
 			productEntity.setPrice(new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF).multiply(KOEF));
 			productEntity.setModel(product.getArticle());
@@ -106,8 +110,24 @@ public abstract class GenericScriblingWorker implements Runnable
 			productDescriptionEntity.setLanguageId(RUSSAIN_LANGUAGE_ID);
 			productDescriptionEntity.setName(product.getName());
 			productDescriptionEntity.setDescription(EMPTY_STRING);
-			productDescriptionEntity.setMetaDescription(EMPTY_STRING);
-			productDescriptionEntity.setMetaKeyword(EMPTY_STRING);
+			String metaDescription = product.getMetaDescription();
+			if(metaDescription != null)
+			{
+				productDescriptionEntity.setMetaDescription(metaDescription);
+			}
+			else
+			{
+				productDescriptionEntity.setMetaDescription(EMPTY_STRING);
+			}
+			String metaKeyword = product.getMetaKeyword();
+			if(metaKeyword != null)
+			{
+				productDescriptionEntity.setMetaKeyword(metaKeyword);
+			}
+			else
+			{
+				productDescriptionEntity.setMetaKeyword(EMPTY_STRING);
+			}
 			productDescriptionEntity.setSeoH1(EMPTY_STRING);
 			productDescriptionEntity.setSeoTitle(EMPTY_STRING);
 			productDescriptionEntity.setTag(EMPTY_STRING);

@@ -84,27 +84,36 @@ public class AlltextileWorker extends GenericScriblingWorker
 			String category = entry.getKey();
 			for (String url : entry.getValue())
 			{
-				Document document = Jsoup.connect(url).get();
-				Elements elements = document.getElementsByClass("product_desc");
-				if(!elements.isEmpty())
+				try
 				{
-					String mainInformation = elements.get(0).text();
-					Product product = buildProductByString(mainInformation);
-					product.setCategory(category);
-					Elements priceElements = document.getElementsByClass("hs_product_price");
-					if(!priceElements.isEmpty())
+					Document document = Jsoup.connect(url).get();
+					Elements elements = document.getElementsByClass("product_desc");
+					if(!elements.isEmpty())
 					{
-						String costString = priceElements.get(0).text();
-						int centIndex = costString.lastIndexOf(".00");
-						if(centIndex > - 1)
+						String mainInformation = elements.get(0).text();
+						Product product = buildProductByString(mainInformation);
+						product.setMetaDescription(document.select("meta[name=description]").get(0).attr("content"));
+						product.setMetaKeyword(document.select("meta[name=keywords]").first().attr("content"));
+						product.setCategory(category);
+						Elements priceElements = document.getElementsByClass("hs_product_price");
+						if(!priceElements.isEmpty())
 						{
-							product.setCost(costString.substring(centIndex - 3, centIndex));
-							products.add(product);
+							String costString = priceElements.get(0).text();
+							int centIndex = costString.lastIndexOf(".00");
+							if(centIndex > - 1)
+							{
+								product.setCost(costString.substring(centIndex - 3, centIndex));
+								products.add(product);
+							}
 						}
+						Element imageElement = document.getElementById("highslide-html");
+						product.setUrl(imageElement.attr("src"));
+						System.out.println(product.toString());
 					}
-					Element imageElement = document.getElementById("highslide-html");
-					product.setUrl(imageElement.attr("src"));
-					System.out.println(product.toString());
+				}
+				catch (Exception e)
+				{
+					System.out.println(e.getMessage());
 				}
 			}
 			result.put(category, products);
@@ -115,17 +124,52 @@ public class AlltextileWorker extends GenericScriblingWorker
 	private Product buildProductByString(String mainInformation)
 	{
 		Product result = new Product();
-		String [] splitedString = mainInformation.split("арт:");
-		result.setName(splitedString[0].replace(". ", EMPTY_STRING));
-		int startArticleIndex = mainInformation.indexOf("арт:");
+		String [] splitedString = mainInformation.split("[Аа]рт");
+		result.setName(splitedString[0].replace(". ", EMPTY_STRING).replace(":",EMPTY_STRING));
+		int startArticleIndex = mainInformation.indexOf("арт");
 		int startAttrIndex = mainInformation.indexOf("Ткань:");
+		int lastDot;
 		if (startArticleIndex > -1)
 		{
-			result.setArticle(mainInformation.substring(startArticleIndex + 3, startAttrIndex - 1).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+			lastDot = mainInformation.indexOf(".", startArticleIndex + 4);
+			if(startAttrIndex > -1)
+			{
+				result.setArticle(mainInformation.substring(startArticleIndex + 4, startAttrIndex - 1).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+			}
+			else if (lastDot > - 1 && lastDot > startArticleIndex)
+			{
+				result.setArticle(mainInformation.substring(startArticleIndex + 3, lastDot).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+			}
+			else
+			{
+				result.setArticle(mainInformation.substring(startArticleIndex + 3).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+			}
+		}
+		else
+		{
+			startArticleIndex = mainInformation.indexOf("Арт");
+			lastDot = mainInformation.indexOf(".", startArticleIndex + 4);
+			if (startAttrIndex > -1)
+			{
+				result.setArticle(mainInformation.substring(startArticleIndex + 4, startAttrIndex - 1).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+			}
+			else if (lastDot > - 1)
+			{
+				result.setArticle(mainInformation.substring(startArticleIndex + 3, lastDot).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+			}
+			else
+			{
+				result.setArticle(mainInformation.substring(startArticleIndex + 3).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+			}
 		}
 		if(startAttrIndex > - 1)
 		{
-			result.setAttributes(mainInformation.substring(startAttrIndex + 7));
+			result.setAttributes(mainInformation.substring(startAttrIndex + 7).replace(". ", EMPTY_STRING));
+		}
+		else
+		{
+			lastDot = mainInformation.lastIndexOf(".");
+			result.setAttributes(mainInformation.substring(lastDot));
 		}
 		return result;
 	}
