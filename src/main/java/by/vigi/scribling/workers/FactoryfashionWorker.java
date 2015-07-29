@@ -88,7 +88,7 @@ public class FactoryfashionWorker extends GenericScriblingWorker
 						int sizeIndex = mainInfo.indexOf("Определить размер");
 						if(sizeIndex > -1 && costFinishIndex > -1)
 						{
-							product.setAttributes(mainInfo.substring(sizeIndex + 17, costIndex));
+							product.setDescription(mainInfo.substring(sizeIndex + 17, costIndex));
 						}
 
 						//Element priceElements = tbody.select("font[font-size:27px;]").get(0);

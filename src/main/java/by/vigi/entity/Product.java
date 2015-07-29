@@ -9,7 +9,9 @@ public class Product
 	private String name;
 	private String article;
 	private String cost;
-	private String attributes;
+	private String description;
+	private String composite;
+	private String sizes;
 	private String metaKeyword;
 	private String metaDescription;
 	private String url;
@@ -19,13 +21,13 @@ public class Product
 	{
 	}
 
-	public Product(String category, String name, String article, String cost, String attributes)
+	public Product(String category, String name, String article, String cost, String description)
 	{
 		this.category = category;
 		this.name = name;
 		this.article = article;
 		this.cost = cost;
-		this.attributes = attributes;
+		this.description = description;
 	}
 
 	public String getCategory()
@@ -68,14 +70,34 @@ public class Product
 		this.cost = cost;
 	}
 
-	public String getAttributes()
+	public String getDescription()
 	{
-		return attributes;
+		return description;
 	}
 
-	public void setAttributes(String attributes)
+	public void setDescription(String description)
 	{
-		this.attributes = attributes;
+		this.description = description;
+	}
+
+	public String getComposite()
+	{
+		return composite;
+	}
+
+	public void setComposite(String composite)
+	{
+		this.composite = composite;
+	}
+
+	public String getSizes()
+	{
+		return sizes;
+	}
+
+	public void setSizes(String sizes)
+	{
+		this.sizes = sizes;
 	}
 
 	public String getMetaKeyword()
@@ -126,7 +148,7 @@ public class Product
 				", name='" + name + '\'' +
 				", article='" + article + '\'' +
 				", cost='" + cost + '\'' +
-				", attributes='" + attributes + '\'' +
+				", description='" + description + '\'' +
 				", metaKeyword='" + metaKeyword + '\'' +
 				", metaDescription='" + metaDescription + '\'' +
 				", url='" + url + '\'' +

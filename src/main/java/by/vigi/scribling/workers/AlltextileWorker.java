@@ -164,12 +164,12 @@ public class AlltextileWorker extends GenericScriblingWorker
 		}
 		if(startAttrIndex > - 1)
 		{
-			result.setAttributes(mainInformation.substring(startAttrIndex + 7).replace(". ", EMPTY_STRING));
+			result.setDescription(mainInformation.substring(startAttrIndex + 7).replace(". ", EMPTY_STRING));
 		}
 		else
 		{
 			lastDot = mainInformation.lastIndexOf(".");
-			result.setAttributes(mainInformation.substring(lastDot));
+			result.setDescription(mainInformation.substring(lastDot));
 		}
 		return result;
 	}

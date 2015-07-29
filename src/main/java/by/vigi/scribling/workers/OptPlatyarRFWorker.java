@@ -104,7 +104,7 @@ public class OptPlatyarRFWorker extends GenericScriblingWorker
 						//parse description
 						Element description = informationTable.select("p[align=left]").first();
 						String descriptionText = description.text();
-						product.setAttributes(descriptionText);
+						product.setDescription(descriptionText);
 
 						//Element priceElements = tbody.select("font[font-size:27px;]").get(0);
 						//product.setCost(priceElements.text());
@@ -134,7 +134,7 @@ public class OptPlatyarRFWorker extends GenericScriblingWorker
 			Map<String, Collection<String>> category2ProductLinks = parseProductLinks(category2Link);
 			Map<String, Collection<Product>> category2Product = parseProducts(category2ProductLinks);
 			System.out.println(category2Link);
-			//startDataBaseJob(category2Product);
+			startDataBaseJob(category2Product);
 		}
 		catch (IOException e)
 		{

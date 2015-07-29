@@ -4,10 +4,6 @@ import by.vigi.entity.*;
 import by.vigi.service.CategoryService;
 import by.vigi.service.ProductService;
 import by.vigi.utils.FileDownloader;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -57,11 +53,6 @@ public abstract class GenericScriblingWorker implements Runnable
 				Collection<ProductEntity> productEntities = category.getCategoryProducts();
 				for (ProductEntity entity : productEntities)
 				{
-					if (isDateToday(entity.getDateModified().getTime()))
-					{
-						continue;
-					}
-					entity.setQuantity(0);
 					Collection<ProductAttributeEntity> attributes = entity.getProductAttributes();
 					List<String> articleAttributes = attributes.stream().filter(item -> item.getAttribute().getAttributeId().equals(13) && item.getLanguageId().equals(RUSSAIN_LANGUAGE_ID)).map(ProductAttributeEntity::getText).collect(Collectors.toList());
 					for (String article : articleAttributes)
@@ -72,10 +63,14 @@ public abstract class GenericScriblingWorker implements Runnable
 							{
 								product.setAlreadyUsed(true);
 								entity.setQuantity(10);
+								entity.setDateModified(new Timestamp(System.currentTimeMillis()));
 							}
 						}
 					}
-					entity.setDateModified(new Timestamp(System.currentTimeMillis()));
+					if (!isDateToday(entity.getDateModified().getTime()))
+					{
+						entity.setQuantity(0);
+					}
 				}
 				productService.updateProducts(productEntities);
 			}
@@ -99,7 +94,10 @@ public abstract class GenericScriblingWorker implements Runnable
 				continue;
 			}
 			ProductEntity productEntity = productService.createNewProductEntity();
-			productEntity.setPrice(new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF).multiply(KOEF));
+			if(product.getCost() != null)
+			{
+				productEntity.setPrice(new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF).multiply(KOEF));
+			}
 			productEntity.setModel(product.getArticle());
 			productEntity.setStatus(true);
 			productEntity.getCategories().add(category);
@@ -147,7 +145,7 @@ public abstract class GenericScriblingWorker implements Runnable
 
 			ProductAttributeEntity compositionAttribute = new ProductAttributeEntity();
 			compositionAttribute.setLanguageId(RUSSAIN_LANGUAGE_ID);
-			compositionAttribute.setText(product.getAttributes());
+			compositionAttribute.setText(product.getDescription());
 			compositionAttribute.setProductId(productEntity.getProductId());
 			compositionAttribute.setAttributeId(COMPOSITION_ATTRIBUTE_ID);
 			productEntity.getProductAttributes().add(compositionAttribute);
