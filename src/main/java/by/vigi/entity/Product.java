@@ -149,10 +149,11 @@ public class Product
 				", article='" + article + '\'' +
 				", cost='" + cost + '\'' +
 				", description='" + description + '\'' +
+				", composite='" + composite + '\'' +
+				", sizes='" + sizes + '\'' +
+				", url='" + url + '\'' +
 				", metaKeyword='" + metaKeyword + '\'' +
 				", metaDescription='" + metaDescription + '\'' +
-				", url='" + url + '\'' +
-				", alreadyUsed=" + alreadyUsed +
 				'}';
 	}
 }

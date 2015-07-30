@@ -3,6 +3,7 @@ package by;
 import by.vigi.entity.*;
 import by.vigi.scribling.workers.AlltextileWorker;
 import by.vigi.scribling.workers.FactoryfashionWorker;
+import by.vigi.scribling.workers.MarimayWorker;
 import by.vigi.scribling.workers.OptPlatyarRFWorker;
 import by.vigi.service.*;
 
@@ -34,9 +35,10 @@ public class Main
 	 */
 	public static void main(String[] args)
 	{
-		//Thread factoryfashionWorker = new Thread(new FactoryfashionWorker());
-		Thread optPlatyarRFWorker = new Thread(new OptPlatyarRFWorker());
-		//factoryfashionWorker.start();
-		optPlatyarRFWorker.start();
+		//System.out.println(Arrays.asList("51,52,53,23,74".split(",")));
+		Thread factoryfashionWorker = new Thread(new MarimayWorker());
+		//Thread optPlatyarRFWorker = new Thread(new OptPlatyarRFWorker());
+		factoryfashionWorker.start();
+		//optPlatyarRFWorker.start();
 	}
 }

@@ -14,7 +14,12 @@ import java.util.Set;
  * Created by Nikita Tkachuk
  */
 @Entity
-@NamedNativeQuery(name = "linkToStore", query = "INSERT INTO product_to_store VALUES (?,?)")
+@NamedNativeQueries(
+		{
+			@NamedNativeQuery(name = "linkToStore", query = "INSERT INTO product_to_store VALUES (?,?)"),
+		}
+
+)
 @javax.persistence.Table(name = "product", schema = "", catalog = "vigiby_opencart")
 public class ProductEntity
 {

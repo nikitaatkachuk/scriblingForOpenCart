@@ -126,16 +126,25 @@ public class MarimayWorker extends GenericScriblingWorker
 
 					product.setArticle(name.split(" ")[0]);
 
-					//Element costElement = document.getElementsByClass("item_price").first();
-
+					Element descriptionElement = document.getElementsByClass("bx_item_description").first();
+					if(descriptionElement != null)
+					{
+						product.setDescription(descriptionElement.text());
+					}
+					Element compositeElement = document.getElementsByClass("item_info_section").get(1);
+					if(compositeElement != null)
+					{
+						product.setComposite(compositeElement.child(0).text());
+					}
 					product.setCost(productLinkToCost.get(url));
 
 					product.setMetaDescription(document.select("meta[name=description]").get(0).attr("content"));
 					product.setMetaKeyword(document.select("meta[name=keywords]").first().attr("content"));
 					product.setCategory(category);
+					product.setSizes("40 42 44 46 48");
 					Element imageBlock = document.getElementsByClass("bx_bigimages_aligner").first();
 					Element imageElement = imageBlock.select("img").first();
-					product.setUrl(imageElement.attr("src"));
+					product.setUrl("http:" + imageElement.attr("src"));
 					products.add(product);
 					System.out.println(product.toString());
 				}
@@ -157,7 +166,7 @@ public class MarimayWorker extends GenericScriblingWorker
 			Map<String, String> category2Link = parseCategoryLinks();
 			Map<String, Collection<String>> category2ProductLinks = parseProductLinks(category2Link);
 			Map<String, Collection<Product>> category2Product = parseProducts(category2ProductLinks);
-			//startDataBaseJob(category2Product);
+			startDataBaseJob(category2Product);
 		}
 		catch (IOException e)
 		{

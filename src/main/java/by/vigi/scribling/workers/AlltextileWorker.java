@@ -108,6 +108,8 @@ public class AlltextileWorker extends GenericScriblingWorker
 						}
 						Element imageElement = document.getElementById("highslide-html");
 						product.setUrl(imageElement.attr("src"));
+
+						product.setSizes(document.getElementsByClass("inputboxattrib").first().text());
 						System.out.println(product.toString());
 					}
 				}
@@ -127,14 +129,14 @@ public class AlltextileWorker extends GenericScriblingWorker
 		String [] splitedString = mainInformation.split("[Аа]рт");
 		result.setName(splitedString[0].replace(". ", EMPTY_STRING).replace(":",EMPTY_STRING));
 		int startArticleIndex = mainInformation.indexOf("арт");
-		int startAttrIndex = mainInformation.indexOf("Ткань:");
+		int startCompositeIndex = mainInformation.indexOf("Ткань:");
 		int lastDot;
 		if (startArticleIndex > -1)
 		{
 			lastDot = mainInformation.indexOf(".", startArticleIndex + 4);
-			if(startAttrIndex > -1)
+			if(startCompositeIndex > -1)
 			{
-				result.setArticle(mainInformation.substring(startArticleIndex + 4, startAttrIndex - 1).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+				result.setArticle(mainInformation.substring(startArticleIndex + 4, startCompositeIndex - 1).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
 			}
 			else if (lastDot > - 1 && lastDot > startArticleIndex)
 			{
@@ -149,9 +151,9 @@ public class AlltextileWorker extends GenericScriblingWorker
 		{
 			startArticleIndex = mainInformation.indexOf("Арт");
 			lastDot = mainInformation.indexOf(".", startArticleIndex + 4);
-			if (startAttrIndex > -1)
+			if (startCompositeIndex > -1)
 			{
-				result.setArticle(mainInformation.substring(startArticleIndex + 4, startAttrIndex - 1).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
+				result.setArticle(mainInformation.substring(startArticleIndex + 4, startCompositeIndex - 1).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
 			}
 			else if (lastDot > - 1)
 			{
@@ -162,14 +164,14 @@ public class AlltextileWorker extends GenericScriblingWorker
 				result.setArticle(mainInformation.substring(startArticleIndex + 3).replace(".", EMPTY_STRING).replace(":", EMPTY_STRING).replace(" ", EMPTY_STRING));
 			}
 		}
-		if(startAttrIndex > - 1)
+		if(startCompositeIndex > - 1)
 		{
-			result.setDescription(mainInformation.substring(startAttrIndex + 7).replace(". ", EMPTY_STRING));
+			result.setComposite(mainInformation.substring(startCompositeIndex + 7).replace(". ", EMPTY_STRING));
 		}
 		else
 		{
 			lastDot = mainInformation.lastIndexOf(".");
-			result.setDescription(mainInformation.substring(lastDot));
+			result.setComposite(mainInformation.substring(lastDot));
 		}
 		return result;
 	}

@@ -2,6 +2,7 @@ package by.vigi.scribling.workers;
 
 import by.vigi.entity.*;
 import by.vigi.service.CategoryService;
+import by.vigi.service.ProductOptionService;
 import by.vigi.service.ProductService;
 import by.vigi.utils.FileDownloader;
 import org.springframework.context.ApplicationContext;
@@ -28,6 +29,8 @@ public abstract class GenericScriblingWorker implements Runnable
 	protected static final String EMPTY_STRING = "";
 	protected static final BigDecimal KOEF = new BigDecimal(1.2);
 	protected static final BigDecimal RUSSION_RUBLE_COURSE = new BigDecimal(270);
+	protected static final int OPTION_ID = 11;
+	protected Map<String, Integer> sizeOnOptionIdValue;
 
 
 	protected abstract Map<String, String> parseCategoryLinks() throws IOException;
@@ -41,6 +44,8 @@ public abstract class GenericScriblingWorker implements Runnable
 		ApplicationContext context = new ClassPathXmlApplicationContext("spring-config.xml");
 		ProductService productService = context.getBean(ProductService.class);
 		CategoryService categoryService = context.getBean(CategoryService.class);
+		ProductOptionService productOptionService = context.getBean(ProductOptionService.class);
+		initOptionsId();
 		for (Map.Entry<String, Collection<Product>> entry : category2Product.entrySet())
 		{
 			String categoryName = entry.getKey();
@@ -80,12 +85,12 @@ public abstract class GenericScriblingWorker implements Runnable
 			}
 
 			List<Product> newProducts = products.stream().filter(product -> !product.isAlreadyUsed()).collect(Collectors.toList());
-			startImportNewProducts(newProducts, category, productService, categoryService, true);
+			startImportNewProducts(newProducts, category, productService, categoryService,productOptionService, true);
 		}
 	}
 
 
-	protected synchronized void startImportNewProducts(List<Product> newProducts, CategoryEntity category, ProductService productService, CategoryService categoryService, boolean imageWillBeDownloaded)
+	protected synchronized void startImportNewProducts(List<Product> newProducts, CategoryEntity category, ProductService productService, CategoryService categoryService, ProductOptionService productOptionService, boolean imageWillBeDownloaded)
 	{
 		for (Product product : newProducts)
 		{
@@ -94,13 +99,56 @@ public abstract class GenericScriblingWorker implements Runnable
 				continue;
 			}
 			ProductEntity productEntity = productService.createNewProductEntity();
-			if(product.getCost() != null)
-			{
-				productEntity.setPrice(new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF).multiply(KOEF));
-			}
+
+
 			productEntity.setModel(product.getArticle());
 			productEntity.setStatus(true);
+			productEntity.setQuantity(20);
 			productEntity.getCategories().add(category);
+
+
+			if(product.getSizes() == null || EMPTY_STRING.equals(product.getSizes()))
+			{
+				if(product.getCost() != null)
+				{
+					productEntity.setPrice(createPrice(product));
+				}
+			}
+			else
+			{
+				//create option
+				ProductOptionEntity productOption = new ProductOptionEntity();
+				productOption.setProductId(productEntity.getProductId());
+				productOption.setOptionId(OPTION_ID);
+				productOption.setRequired(true);
+				productOption.setOptionValue(EMPTY_STRING);
+				productOption = productOptionService.createProductOption(productOption);
+
+				List<String> sizes = parseSizes(product.getSizes());
+				for (String size : sizes)
+				{
+					ProductOptionValueEntity  productOptionValue = new ProductOptionValueEntity();
+					productOptionValue.setProductOptionId(productOption.getProductOptionId());
+					productOptionValue.setProductId(productEntity.getProductId());
+					productOptionValue.setOptionId(OPTION_ID);
+					Integer optionValueId = sizeOnOptionIdValue.get(size);
+					if(optionValueId == null)
+					{
+						continue;
+					}
+					productOptionValue.setOptionValueId(optionValueId);
+					productOptionValue.setQuantity(10);
+					productOptionValue.setSubtract(true);
+					productOptionValue.setPrice(createPrice(product));
+					productOptionValue.setPricePrefix("+");
+					productOptionValue.setPoints(0);
+					productOptionValue.setPointsPrefix("+");
+					productOptionValue.setWeight(BigDecimal.ZERO);
+					productOptionValue.setWeightPrefix("+");
+					productOptionService.createProductOptionValue(productOptionValue);
+				}
+
+			}
 
 			//Add description entity
 			ProductDescriptionEntity productDescriptionEntity = new ProductDescriptionEntity();
@@ -109,22 +157,22 @@ public abstract class GenericScriblingWorker implements Runnable
 			productDescriptionEntity.setName(product.getName());
 			productDescriptionEntity.setDescription(EMPTY_STRING);
 			String metaDescription = product.getMetaDescription();
-			if(metaDescription != null)
-			{
-				productDescriptionEntity.setMetaDescription(metaDescription);
-			}
-			else
+			if(metaDescription == null || metaDescription.length() > 255)
 			{
 				productDescriptionEntity.setMetaDescription(EMPTY_STRING);
 			}
-			String metaKeyword = product.getMetaKeyword();
-			if(metaKeyword != null)
+			else
 			{
-				productDescriptionEntity.setMetaKeyword(metaKeyword);
+				productDescriptionEntity.setMetaDescription(metaDescription);
+			}
+			String metaKeyword = product.getMetaKeyword();
+			if(metaKeyword == null || metaKeyword.length() > 255)
+			{
+				productDescriptionEntity.setMetaKeyword(EMPTY_STRING);
 			}
 			else
 			{
-				productDescriptionEntity.setMetaKeyword(EMPTY_STRING);
+				productDescriptionEntity.setMetaKeyword(metaKeyword);
 			}
 			productDescriptionEntity.setSeoH1(EMPTY_STRING);
 			productDescriptionEntity.setSeoTitle(EMPTY_STRING);
@@ -143,12 +191,27 @@ public abstract class GenericScriblingWorker implements Runnable
 
 			productEntity.getProductAttributes().addAll(productAttributes);
 
-			ProductAttributeEntity compositionAttribute = new ProductAttributeEntity();
-			compositionAttribute.setLanguageId(RUSSAIN_LANGUAGE_ID);
-			compositionAttribute.setText(product.getDescription());
-			compositionAttribute.setProductId(productEntity.getProductId());
-			compositionAttribute.setAttributeId(COMPOSITION_ATTRIBUTE_ID);
-			productEntity.getProductAttributes().add(compositionAttribute);
+			String composite = product.getComposite();
+			if(composite != null)
+			{
+				ProductAttributeEntity compositionAttribute = new ProductAttributeEntity();
+				compositionAttribute.setLanguageId(RUSSAIN_LANGUAGE_ID);
+				compositionAttribute.setText(composite);
+				compositionAttribute.setProductId(productEntity.getProductId());
+				compositionAttribute.setAttributeId(COMPOSITION_ATTRIBUTE_ID);
+				productEntity.getProductAttributes().add(compositionAttribute);
+			}
+
+			String description = product.getDescription();
+			if(description != null)
+			{
+				ProductAttributeEntity descriptionAttribute = new ProductAttributeEntity();
+				descriptionAttribute.setLanguageId(RUSSAIN_LANGUAGE_ID);
+				descriptionAttribute.setText(description);
+				descriptionAttribute.setProductId(productEntity.getProductId());
+				descriptionAttribute.setAttributeId(DESCRIPTION_ATTRIBUTE_ID);
+				productEntity.getProductAttributes().add(descriptionAttribute);
+			}
 
 			if (imageWillBeDownloaded)
 			{
@@ -170,6 +233,8 @@ public abstract class GenericScriblingWorker implements Runnable
 		categoryService.updateCategory(category);
 	}
 
+	private BigDecimal createPrice(Product product) {return new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF).multiply(KOEF);}
+
 	private boolean isDateToday(long milliSeconds)
 	{
 		Calendar calendar = Calendar.getInstance();
@@ -185,6 +250,26 @@ public abstract class GenericScriblingWorker implements Runnable
 		Date startDate = calendar.getTime();
 
 		return getDate.compareTo(startDate) > 0;
+
+	}
+
+	private List<String> parseSizes(String sizes)
+	{
+		//List<String> result = new ArrayList<>();
+		return Arrays.asList(sizes.split(" "));
+	}
+
+	//TODO: remove fucking hardcode!!!
+
+	private void initOptionsId()
+	{
+		sizeOnOptionIdValue = new HashMap<>();
+		Integer startSize = 36;
+		for (int i = 0; i < 13; i++)
+		{
+			sizeOnOptionIdValue.put(startSize.toString(), 46 + i);
+			startSize = startSize + 2;
+		}
 
 	}
 }
