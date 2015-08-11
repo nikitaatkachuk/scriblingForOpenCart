@@ -6,7 +6,7 @@ import javax.persistence.*;
  * Created by Nikita Tkachuk
  */
 @Entity
-@Table(name = "product_option", schema = "", catalog = "vigiby_opencart")
+@Table(name = "product_option")
 public class ProductOptionEntity
 {
 

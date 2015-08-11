@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  * Created by Nikita Tkachuk
  */
 @Entity
-@Table(name = "product_option_value", schema = "", catalog = "vigiby_opencart")
+@Table(name = "product_option_value")
 public class ProductOptionValueEntity
 {
 	private Integer productOptionValueId;

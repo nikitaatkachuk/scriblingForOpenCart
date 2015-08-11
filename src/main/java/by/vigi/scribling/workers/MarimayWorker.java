@@ -27,10 +27,13 @@ public class MarimayWorker extends GenericScriblingWorker
 	//Use for parsing product's cost from category page, because on product page cost loaded by js
 	private Map<String, String> productLinkToCost = new HashMap<>();
 
-	public static void main(String[] args) throws IOException
+	public MarimayWorker(boolean forOpt, int marginKoef)
 	{
-		MarimayWorker worker = new MarimayWorker();
-		worker.parseProducts(worker.parseProductLinks(worker.parseCategoryLinks()));
+		super(forOpt, marginKoef);
+	}
+
+	public MarimayWorker()
+	{
 	}
 
 	@Override
@@ -158,21 +161,7 @@ public class MarimayWorker extends GenericScriblingWorker
 		return result;
 	}
 
-	@Override
-	public void run()
-	{
-		try
-		{
-			Map<String, String> category2Link = parseCategoryLinks();
-			Map<String, Collection<String>> category2ProductLinks = parseProductLinks(category2Link);
-			Map<String, Collection<Product>> category2Product = parseProducts(category2ProductLinks);
-			startDataBaseJob(category2Product);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
+
 
 	protected Map<String, String> getCookies()
 	{

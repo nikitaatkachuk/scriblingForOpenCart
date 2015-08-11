@@ -20,7 +20,7 @@ import java.util.Set;
 		}
 
 )
-@javax.persistence.Table(name = "product", schema = "", catalog = "vigiby_opencart")
+@javax.persistence.Table(name = "product")
 public class ProductEntity
 {
 

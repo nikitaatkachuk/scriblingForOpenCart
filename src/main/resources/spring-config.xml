@@ -27,9 +27,12 @@
 	<bean id="dataSource"
 	      class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="url" value="jdbc:mysql://localhost:3306/vigiby_opencart?useUnicode=yes&amp;characterEncoding=UTF-8"/>
-		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <!--<property name="url" value="jdbc:mysql://localhost:3306/opt_vigiby?useUnicode=yes&amp;characterEncoding=UTF-8"/>-->
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
 		<property name="username" value="vigiby"/>
 		<property name="password" value="Wae3Shu9"/>
+        <!--<property name="username" value="root"/>-->
+        <!--<property name="password" value="rsv3362tgsd"/>-->
 	</bean>
 
 	<bean id="sessionFactory"

@@ -17,6 +17,16 @@ import java.util.Map;
  */
 public class AlltextileWorker extends GenericScriblingWorker
 {
+
+	public AlltextileWorker()
+	{
+	}
+
+	public AlltextileWorker(boolean forOpt, int marginKoef)
+	{
+		super(forOpt, marginKoef);
+	}
+
 	protected Map<String, String> parseCategoryLinks() throws IOException
 	{
 		Document document = Jsoup.connect("http://alltextile.info/").get();
@@ -176,19 +186,4 @@ public class AlltextileWorker extends GenericScriblingWorker
 		return result;
 	}
 
-	@Override
-	public void run()
-	{
-		try
-		{
-			Map<String, String> category2Link = parseCategoryLinks();
-			Map<String, Collection<String>> category2ProductLinks = parseProductLinks(category2Link);
-			Map<String, Collection<Product>> category2Product = parseProducts(category2ProductLinks);
-			startDataBaseJob(category2Product);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
 }
