@@ -109,17 +109,6 @@ public class MarimayWorker extends GenericScriblingWorker
 			{
 				try
 				{
-					int relativePathStartIndex = url.indexOf("/catalog");
-//					Connection.Response res = Jsoup.connect(url)
-//							.data("AUTH_FORM", "y")
-//							.data("Login", "Войти")
-//							.data("TYPE", "AUTH")
-//							.data("USER_LOGIN", "dimasin16@mail.ru")
-//							.data("USER_PASSWORD", "1523dimasin1523")
-//							.data("backurl", url.substring(relativePathStartIndex) + "index.php")
-//							.userAgent("Mozilla/5.0")
-//							.method(Connection.Method.POST).execute();
-//					Document document = res.parse();
 					Document document = Jsoup.connect(url).userAgent("Mozilla/5.0").cookies(getCookies()).get();
 					Product product = new Product();
 					Element productTitle = document.getElementsByClass("title-str").first();
@@ -161,7 +150,29 @@ public class MarimayWorker extends GenericScriblingWorker
 		return result;
 	}
 
+	@Override
+	protected String parseImageUrl(Document document)
+	{
+		return null;
+	}
 
+	@Override
+	protected String parseProductName(Document document)
+	{
+		return null;
+	}
+
+	@Override
+	protected String parseArticle(Document document)
+	{
+		return null;
+	}
+
+	@Override
+	protected String parseCost(Document document)
+	{
+		return null;
+	}
 
 	protected Map<String, String> getCookies()
 	{

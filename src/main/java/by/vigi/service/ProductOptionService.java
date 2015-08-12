@@ -24,7 +24,6 @@ public class ProductOptionService
 	public ProductOptionValueEntity createProductOptionValue(ProductOptionValueEntity productOptionValue)
 	{
 		return productOptionValueDao.create(productOptionValue);
-
 	}
 
 	public ProductOptionDao getProductOptionDao()

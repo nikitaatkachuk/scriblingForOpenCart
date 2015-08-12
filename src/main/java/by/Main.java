@@ -36,19 +36,22 @@ public class Main
 		{
 			System.out.println("Parse for opt");
 			//Thread mariMay = new Thread(new MarimayWorker(true, 1));
-			Thread allTextile = new Thread(new AlltextileWorker(false, 1));
+			//Thread allTextile = new Thread(new AlltextileWorker(false, 1));
+			Thread mondigoThread = new Thread(new MondigoWorker());
 			//mariMay.start();
-			allTextile.start();
+			//allTextile.start();
+			mondigoThread.start();
 		}
 		else
 		{
 			System.out.println("Pars for roznica");
-			Thread guindaThread = new Thread(new GuindaWorker());
+
+//			Thread guindaThread = new Thread(new GuindaWorker());
 //			Thread maryMay = new Thread(new MarimayWorker(false, 2));
 //			Thread allTextile = new Thread(new AlltextileWorker(false, 2));
 //			maryMay.start();
 //			allTextile.start();
-			guindaThread.start();
+//			guindaThread.start();
 		}
 	}
 }

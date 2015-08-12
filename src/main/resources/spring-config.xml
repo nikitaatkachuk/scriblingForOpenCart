@@ -26,13 +26,13 @@
 
 	<bean id="dataSource"
 	      class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="url" value="jdbc:mysql://localhost:3306/vigiby_opencart?useUnicode=yes&amp;characterEncoding=UTF-8"/>
-        <!--<property name="url" value="jdbc:mysql://localhost:3306/opt_vigiby?useUnicode=yes&amp;characterEncoding=UTF-8"/>-->
+		<!--<property name="url" value="jdbc:mysql://localhost:3306/vigiby_opencart?useUnicode=yes&amp;characterEncoding=UTF-8"/>-->
+        <property name="url" value="jdbc:mysql://localhost:3306/opt_vigiby?useUnicode=yes&amp;characterEncoding=UTF-8"/>
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-		<property name="username" value="vigiby"/>
-		<property name="password" value="Wae3Shu9"/>
-        <!--<property name="username" value="root"/>-->
-        <!--<property name="password" value="rsv3362tgsd"/>-->
+		<!--<property name="username" value="vigiby"/>-->
+		<!--<property name="password" value="Wae3Shu9"/>-->
+        <property name="username" value="root"/>
+        <property name="password" value="rsv3362tgsd"/>
 	</bean>
 
 	<bean id="sessionFactory"
@@ -75,6 +75,12 @@
     <bean id="productOptionValueDao" class="by.vigi.dao.impl.ProductOptionValueDao">
     </bean>
 
+    <bean id="optionValueDao" class="by.vigi.dao.impl.OptionValueDao">
+    </bean>
+
+    <bean id="optionValueDescriptionDao" class="by.vigi.dao.impl.OptionValueDescriptionDao">
+    </bean>
+
 
     <!--Services -->
 
@@ -97,6 +103,11 @@
     <bean id="productOptionService" class="by.vigi.service.ProductOptionService">
         <property name="productOptionDao" ref="productOptionDao"/>
         <property name="productOptionValueDao" ref="productOptionValueDao"/>
+    </bean>
+
+    <bean id="optionValueService" class="by.vigi.service.OptionValueService">
+        <property name="valueDao" ref="optionValueDao"/>
+        <property name="valueDescriptionDao" ref="optionValueDescriptionDao"/>
     </bean>
 
 </beans>

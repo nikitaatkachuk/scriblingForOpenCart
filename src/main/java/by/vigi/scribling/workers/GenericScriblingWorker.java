@@ -2,9 +2,11 @@ package by.vigi.scribling.workers;
 
 import by.vigi.entity.*;
 import by.vigi.service.CategoryService;
+import by.vigi.service.OptionValueService;
 import by.vigi.service.ProductOptionService;
 import by.vigi.service.ProductService;
 import by.vigi.utils.FileDownloader;
+import org.jsoup.nodes.Document;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -49,11 +51,23 @@ public abstract class GenericScriblingWorker implements Runnable
 		this.currentMargin = koefMargin;
 	}
 
+	/**
+	 * Parse links on category products form catalog.
+	 * Now connection and authorization on site using in this method (Mb will be replaced in future)
+	 * @return  Map Category ->  Category link on site. For example, "Shirt" -> "http://site.com/catalog/shirts"
+	 * @throws IOException
+	 */
+
 	protected abstract Map<String, String> parseCategoryLinks() throws IOException;
 
 	protected abstract Map<String, Collection<String>> parseProductLinks(Map<String, String> categoryOnLinkMap) throws IOException;
 
 	protected abstract Map<String, Collection<Product>> parseProducts(Map<String, Collection<String>> categoryOnProductLinksMap) throws IOException;
+
+	protected abstract String parseImageUrl(Document document);
+	protected abstract String parseProductName(Document document);
+	protected abstract String parseArticle(Document document);
+	protected abstract String parseCost(Document document);
 
 	protected void startDataBaseJob(Map<String, Collection<Product>> category2Product)
 	{
@@ -61,7 +75,8 @@ public abstract class GenericScriblingWorker implements Runnable
 		ProductService productService = context.getBean(ProductService.class);
 		CategoryService categoryService = context.getBean(CategoryService.class);
 		ProductOptionService productOptionService = context.getBean(ProductOptionService.class);
-		initOptionsId();
+		OptionValueService optionValueService = context.getBean(OptionValueService.class);
+		initOptionsId(optionValueService);
 		for (Map.Entry<String, Collection<Product>> entry : category2Product.entrySet())
 		{
 			String categoryName = entry.getKey();
@@ -209,8 +224,8 @@ public abstract class GenericScriblingWorker implements Runnable
 			ProductDescriptionEntity productDescriptionEntity = new ProductDescriptionEntity();
 			productDescriptionEntity.setProductId(productEntity.getProductId());
 			productDescriptionEntity.setLanguageId(RUSSAIN_LANGUAGE_ID);
-			productDescriptionEntity.setName(product.getName());
-			productDescriptionEntity.setDescription(EMPTY_STRING);
+			productDescriptionEntity.setName(product.getName() != null ? product.getName() : EMPTY_STRING);
+			productDescriptionEntity.setDescription(product.getDescription() != null ? product.getDescription() : EMPTY_STRING);
 			String metaDescription = product.getMetaDescription();
 			if(metaDescription == null || metaDescription.length() > 255)
 			{
@@ -306,30 +321,34 @@ public abstract class GenericScriblingWorker implements Runnable
 
 	protected BigDecimal createPrice(Product product, boolean onOption)
 	{
-		BigDecimal finalPrice;
-		if(forOpt && onOption)
-		{
-			finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF_FOR_OPT).multiply(KOEF_FOR_OPT).multiply(BigDecimal.valueOf(5));
-		}
-		else if(forOpt && !onOption)
-		{
-			finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF_FOR_OPT).multiply(KOEF_FOR_OPT);
-		}
-		else
-		{
-			if(currentMargin == OPT_KOEF)
-			{
-				finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF_FOR_OPT).multiply(KOEF_FOR_OPT);
-			}
-			else
-			{
-				finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF).multiply(KOEF);
-			}
-		}
-		BigDecimal setScale = finalPrice.divide(BigDecimal.valueOf(1000));;
+//		BigDecimal finalPrice;
+//		if(forOpt && onOption)
+//		{
+//			finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF_FOR_OPT).multiply(KOEF_FOR_OPT).multiply(BigDecimal.valueOf(5));
+//		}
+//		else if(forOpt && !onOption)
+//		{
+//			finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF_FOR_OPT).multiply(KOEF_FOR_OPT);
+//		}
+//		else
+//		{
+//			if(currentMargin == OPT_KOEF)
+//			{
+//				finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF_FOR_OPT).multiply(KOEF_FOR_OPT);
+//			}
+//			else
+//			{
+//				finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF).multiply(KOEF);
+//			}
+//		}
+//		BigDecimal setScale = finalPrice.divide(BigDecimal.valueOf(1000));;
+//		BigDecimal bigDecimal = setScale.setScale(0, BigDecimal.ROUND_HALF_UP);
+//		finalPrice = bigDecimal.multiply(BigDecimal.valueOf(1000));
+		BigDecimal finalPrice = new BigDecimal(product.getCost()).multiply(BigDecimal.valueOf(252)).multiply(KOEF_FOR_OPT).multiply(BigDecimal.valueOf(1.23));
+		BigDecimal setScale = finalPrice.divide(BigDecimal.valueOf(1000));
 		BigDecimal bigDecimal = setScale.setScale(0, BigDecimal.ROUND_HALF_UP);
-		finalPrice = bigDecimal.multiply(BigDecimal.valueOf(1000));
-		return finalPrice;
+		return bigDecimal.multiply(BigDecimal.valueOf(1000));
+		//return finalPrice;
 	}
 
 	private boolean isDateToday(long milliSeconds)
@@ -356,28 +375,32 @@ public abstract class GenericScriblingWorker implements Runnable
 		return Arrays.asList(sizes.split(" "));
 	}
 
-	//TODO: remove fucking hardcode!!!
-
-	private void initOptionsId()
+	private void initOptionsId(OptionValueService optionValueService)
 	{
 		sizeOnOptionIdValue = new HashMap<>();
-		if(forOpt)
-		{
-			sizeOnOptionIdValue.put("40-42", 46);
-			sizeOnOptionIdValue.put("40-44", 47);
-			sizeOnOptionIdValue.put("40-46", 48);
-			sizeOnOptionIdValue.put("40-48", 49);
-			sizeOnOptionIdValue.put("40-50", 50);
-		}
-		else
-		{
-			//to vigi.by
-			Integer startSize = 36;
-			for (int i = 0; i < 13; i++)
-			{
-				sizeOnOptionIdValue.put(startSize.toString(), 46 + i);
-				startSize = startSize + 2;
-			}
+		//TODO: Replace filters to DAO impl to query
+		Collection<OptionValueDescriptionEntity> descriptions = optionValueService.findAll();
+		sizeOnOptionIdValue = descriptions.stream().filter(description -> description.getLanguageId().equals(RUSSAIN_LANGUAGE_ID))
+				.filter(description -> description.getOptionId().equals(OPTION_ID))
+				.collect(Collectors.toMap(OptionValueDescriptionEntity::getName, OptionValueDescriptionEntity::getOptionValueId));
+
+//		if(forOpt)
+//		{
+//			sizeOnOptionIdValue.put("40-42", 46);
+//			sizeOnOptionIdValue.put("40-44", 47);
+//			sizeOnOptionIdValue.put("40-46", 48);
+//			sizeOnOptionIdValue.put("40-48", 49);
+//			sizeOnOptionIdValue.put("40-50", 50);
+//		}
+//		else
+//		{
+//			//to vigi.by
+//			Integer startSize = 36;
+//			for (int i = 0; i < 13; i++)
+//			{
+//				sizeOnOptionIdValue.put(startSize.toString(), 46 + i);
+//				startSize = startSize + 2;
+//			}
 			//to opt.vigi.by
 //			Integer startSize = 40;
 //			for (int i = 0; i < 7; i++)
@@ -385,7 +408,7 @@ public abstract class GenericScriblingWorker implements Runnable
 //				sizeOnOptionIdValue.put(startSize.toString(), 51 + i);
 //				startSize = startSize + 2;
 //			}
-		}
+//		}
 
 	}
 

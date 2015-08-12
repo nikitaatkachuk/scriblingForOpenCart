@@ -186,4 +186,27 @@ public class AlltextileWorker extends GenericScriblingWorker
 		return result;
 	}
 
+	@Override
+	protected String parseImageUrl(Document document)
+	{
+		return null;
+	}
+
+	@Override
+	protected String parseProductName(Document document)
+	{
+		return null;
+	}
+
+	@Override
+	protected String parseArticle(Document document)
+	{
+		return null;
+	}
+
+	@Override
+	protected String parseCost(Document document)
+	{
+		return null;
+	}
 }

@@ -126,19 +126,26 @@ public class OptPlatyarRFWorker extends GenericScriblingWorker
 	}
 
 	@Override
-	public void run()
+	protected String parseImageUrl(Document document)
 	{
-		try
-		{
-			Map<String, String> category2Link = parseCategoryLinks();
-			Map<String, Collection<String>> category2ProductLinks = parseProductLinks(category2Link);
-			Map<String, Collection<Product>> category2Product = parseProducts(category2ProductLinks);
-			System.out.println(category2Link);
-			startDataBaseJob(category2Product);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		return null;
+	}
+
+	@Override
+	protected String parseProductName(Document document)
+	{
+		return null;
+	}
+
+	@Override
+	protected String parseArticle(Document document)
+	{
+		return null;
+	}
+
+	@Override
+	protected String parseCost(Document document)
+	{
+		return null;
 	}
 }

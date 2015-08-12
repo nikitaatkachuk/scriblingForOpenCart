@@ -35,7 +35,7 @@ public final class FileDownloader
 		try(InputStream inputStream = url.openStream(); OutputStream outputStream = new FileOutputStream(result))
 		{
 			BufferedImage image = ImageIO.read(inputStream);
-			image = image.getSubimage(0, 0, image.getWidth(), image.getHeight() - 50);
+			image = image.getSubimage(0, 0, image.getWidth(), image.getHeight() - 30);
 			ImageIO.write(image,"jpg", outputStream);
 		}
 		catch (IOException e)
