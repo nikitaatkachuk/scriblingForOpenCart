@@ -1,5 +1,7 @@
 package by.vigi.service;
 
+import java.util.Collection;
+
 import by.vigi.dao.impl.ProductOptionDao;
 import by.vigi.dao.impl.ProductOptionValueDao;
 import by.vigi.entity.ProductOptionEntity;
@@ -24,6 +26,16 @@ public class ProductOptionService
 	public ProductOptionValueEntity createProductOptionValue(ProductOptionValueEntity productOptionValue)
 	{
 		return productOptionValueDao.create(productOptionValue);
+	}
+
+	public ProductOptionValueEntity updateProductOptionValue(ProductOptionValueEntity productOptionValue)
+	{
+		return productOptionValueDao.update(productOptionValue);
+	}
+
+	public Collection<ProductOptionValueEntity> findByProductId(Integer productId)
+	{
+		return productOptionValueDao.findByProductId(productId);
 	}
 
 	public ProductOptionDao getProductOptionDao()

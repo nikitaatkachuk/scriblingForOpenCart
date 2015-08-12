@@ -99,6 +99,7 @@ public abstract class GenericScriblingWorker implements Runnable
 							{
 								product.setAlreadyUsed(true);
 								entity.setQuantity(20);
+								updateOptions(entity,product, productOptionService);
 								entity.setPrice(createPrice(product, false));
 								entity.setDateModified(new Timestamp(System.currentTimeMillis()));
 							}
@@ -121,6 +122,16 @@ public abstract class GenericScriblingWorker implements Runnable
 		}
 	}
 
+	private void updateOptions(ProductEntity entity, Product product, ProductOptionService productOptionService)
+	{
+		Collection<ProductOptionValueEntity> optionsForUpdate = productOptionService.findByProductId(entity.getProductId());
+		for (ProductOptionValueEntity productOptionValueEntity : optionsForUpdate)
+		{
+			productOptionValueEntity.setPrice(createPrice(product, false));
+			productOptionValueEntity.setPricePrefix("+");
+			productOptionService.updateProductOptionValue(productOptionValueEntity);
+		}
+	}
 
 	protected synchronized void startImportNewProducts(List<Product> newProducts, CategoryEntity category, ProductService productService, CategoryService categoryService, ProductOptionService productOptionService, boolean imageWillBeDownloaded)
 	{
