@@ -151,28 +151,43 @@ public abstract class GenericScriblingWorker implements Runnable
 				productOptionValue.setQuantity(0);
 			}
 			List<String> sizes = parseSizes(product.getSizes());
-			//TODO : Use iterator for remove
-			for (String size : sizes)
-			{
-				Integer sizeId = sizeOnOptionIdValue.get(size);
-				if(sizeOnOptionIdValue != null)
-				{
-					//ProductOptionValueEntity productOptionValueEntity = optionsForUpdate.stream().filter(optionValue -> optionValue.getOptionValueId().equals(sizeId)).findFirst().get();
-					for (ProductOptionValueEntity productOptionValueEntity : optionsForUpdate)
-					{
-						if(productOptionValueEntity.getOptionValueId().equals(sizeId))
-						{
-							productOptionValueEntity.setQuantity(40);
-						}
-					}
-				}
-				//TODO: remove processed sizes and add new product options
-			}
 			if(sizes.size() != optionsForUpdate.size())
 			{
 				LOGGER.info("Count sizes for product " + entity.getModel() + " changed. New size count = " + sizes.size()
 						+ ", old sizes count " +  optionsForUpdate.size());
 			}
+			//TODO : Use iterator for remove
+			Iterator<String> iterator = sizes.iterator();
+			while (iterator.hasNext())
+			{
+				String size = iterator.next();
+				Integer sizeId = sizeOnOptionIdValue.get(size);
+				if (sizeOnOptionIdValue != null)
+				{
+					//ProductOptionValueEntity productOptionValueEntity = optionsForUpdate.stream().filter(optionValue -> optionValue.getOptionValueId().equals(sizeId)).findFirst().get();
+					for (ProductOptionValueEntity productOptionValueEntity : optionsForUpdate)
+					{
+						if (productOptionValueEntity.getOptionValueId().equals(sizeId))
+						{
+							productOptionValueEntity.setQuantity(40);
+							iterator.remove();
+						}
+					}
+				}
+				//TODO: remove processed sizes and add new product options
+			}
+			if(sizes.size() > 0)
+			{
+				//Add new option
+				for (String size : sizes)
+				{
+					ProductOptionValueEntity newProductOptionValue = makeNewProductOptionValueEntity(product, entity,
+							optionsForUpdate.iterator().next().getProductOptionId(), size);
+					productOptionService.updateProductOptionValue(newProductOptionValue);
+				}
+			}
+
+
 
 		}
 		for(ProductOptionValueEntity productOptionValue : optionsForUpdate)
@@ -225,24 +240,9 @@ public abstract class GenericScriblingWorker implements Runnable
 					List<String> sizes = parseSizes(product.getSizes());
 					for (String size : sizes)
 					{
-						ProductOptionValueEntity productOptionValue = new ProductOptionValueEntity();
-						productOptionValue.setProductOptionId(productOption.getProductOptionId());
-						productOptionValue.setProductId(productEntity.getProductId());
-						productOptionValue.setOptionId(OPTION_ID);
-						Integer optionValueId = sizeOnOptionIdValue.get(size);
-						if (optionValueId == null)
-						{
-							continue;
-						}
-						productOptionValue.setOptionValueId(optionValueId);
-						productOptionValue.setQuantity(20);
-						productOptionValue.setSubtract(true);
-						productOptionValue.setPrice(createPrice(product, false));
-						productOptionValue.setPricePrefix("+");
-						productOptionValue.setPoints(0);
-						productOptionValue.setPointsPrefix("+");
-						productOptionValue.setWeight(BigDecimal.ZERO);
-						productOptionValue.setWeightPrefix("+");
+						ProductOptionValueEntity productOptionValue = makeNewProductOptionValueEntity(product, productEntity,
+								productOption.getProductOptionId(), size);
+						if (productOptionValue == null) return;
 						productOptionService.createProductOptionValue(productOptionValue);
 					}
 				}
@@ -357,6 +357,30 @@ public abstract class GenericScriblingWorker implements Runnable
 			productService.updateProducts(Collections.singletonList(productEntity));
 		}
 		categoryService.updateCategory(category);
+	}
+
+	private ProductOptionValueEntity makeNewProductOptionValueEntity(Product product, ProductEntity productEntity,
+																	 Integer productOptionId, String size)
+	{
+		ProductOptionValueEntity productOptionValue = new ProductOptionValueEntity();
+		productOptionValue.setProductOptionId(productOptionId);
+		productOptionValue.setProductId(productEntity.getProductId());
+		productOptionValue.setOptionId(OPTION_ID);
+		Integer optionValueId = sizeOnOptionIdValue.get(size);
+		if (optionValueId == null)
+		{
+			return null;
+		}
+		productOptionValue.setOptionValueId(optionValueId);
+		productOptionValue.setQuantity(20);
+		productOptionValue.setSubtract(true);
+		productOptionValue.setPrice(createPrice(product, false));
+		productOptionValue.setPricePrefix("+");
+		productOptionValue.setPoints(0);
+		productOptionValue.setPointsPrefix("+");
+		productOptionValue.setWeight(BigDecimal.ZERO);
+		productOptionValue.setWeightPrefix("+");
+		return productOptionValue;
 	}
 
 	private ProductAttributeEntity createDescription(ProductEntity productEntity, String description)
