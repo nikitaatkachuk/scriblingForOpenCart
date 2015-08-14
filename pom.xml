@@ -13,6 +13,7 @@
 	    <spring-version>4.1.5.RELEASE</spring-version>
 	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>4.3.7.Final</hibernate.version>
+        <poi.version>3.10-FINAL</poi.version>
     </properties>
 
 	<dependencies>
@@ -27,7 +28,29 @@
             <version>1.8.1</version>
         </dependency>
 
-		<!--Spring-->
+        <!-- Apace POI for working with excel files -->
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+
+
+        <!-- Logger -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+
+        <!--Spring-->
 
 		<dependency>
 			<groupId>org.springframework</groupId>

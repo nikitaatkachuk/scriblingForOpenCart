@@ -24,6 +24,8 @@ public class MondigoWorker extends GenericScriblingWorker
 	@Override
 	protected Map<String, String> parseCategoryLinks() throws IOException
 	{
+		LOGGER.info("Start Mondigo worker");
+
 		Connection.Response loginForm = Jsoup.connect(SITE_URL)
 				.method(Connection.Method.GET).timeout(10 * 100000)
 				.execute();
@@ -134,69 +136,76 @@ public class MondigoWorker extends GenericScriblingWorker
 	protected Map<String, Collection<Product>> parseProducts(Map<String, Collection<String>> categoryOnProductLinksMap) throws IOException
 	{
 		Map<String, Collection<Product>> result = new HashMap<>();
-		for(Map.Entry<String, Collection<String>> entry : categoryOnProductLinksMap.entrySet())
+		try
 		{
-			String category = entry.getKey();
-			Collection<String> productUrls = entry.getValue();
-			Collection<Product> products = new ArrayList<>(productUrls.size());
-			for(String productUrl : productUrls)
+			for(Map.Entry<String, Collection<String>> entry : categoryOnProductLinksMap.entrySet())
 			{
-				Document document = Jsoup.connect(productUrl).cookies(getCookies()).timeout(10*1000).get();
-				Product product = new Product();
-				product.setCategory(category);
-
-				//parse image
-				product.setUrl(parseImageUrl(document));
-
-				//parse name
-				product.setName(parseProductName(document));
-
-				Elements mainInformationElements = document.getElementsByClass("box__row");
-				for (Element infoElement : mainInformationElements)
+				String category = entry.getKey();
+				Collection<String> productUrls = entry.getValue();
+				Collection<Product> products = new ArrayList<>(productUrls.size());
+				for(String productUrl : productUrls)
 				{
-					String articleString = "Артикул: ";
-					String compositeString = "Состав:";
-					String value = infoElement.text();
-					if(value.contains(articleString))
+					Document document = Jsoup.connect(productUrl).cookies(getCookies()).timeout(10*1000).get();
+					Product product = new Product();
+					product.setCategory(category);
+
+					//parse image
+					product.setUrl(parseImageUrl(document));
+
+					//parse name
+					product.setName(parseProductName(document));
+
+					Elements mainInformationElements = document.getElementsByClass("box__row");
+					for (Element infoElement : mainInformationElements)
 					{
-						product.setArticle(value.replace(articleString, ""));
+						String articleString = "Артикул: ";
+						String compositeString = "Состав:";
+						String value = infoElement.text();
+						if(value.contains(articleString))
+						{
+							product.setArticle(value.replace(articleString, ""));
+						}
+						else if (value.contains(compositeString))
+						{
+							product.setComposite(value.replace(compositeString,""));
+						}
 					}
-					else if (value.contains(compositeString))
+
+					Elements sizesAndPriceTableRows = document.getElementsByClass("tr-offer").select(".active");
+					StringBuilder builder = new StringBuilder();
+					for(Element sizesAndPriceTableRow : sizesAndPriceTableRows)
 					{
-						product.setComposite(value.replace(compositeString,""));
+						Elements sizes = sizesAndPriceTableRow.getElementsByClass("size-label__body");
+						if(!sizes.isEmpty())
+						{
+							builder.append(sizes.first().text()).append(" ");
+						}
 					}
+					if (!sizesAndPriceTableRows.isEmpty())
+					{
+						Elements prices = sizesAndPriceTableRows.first().getElementsByClass("itemPrice");
+						if(prices != null && !prices.isEmpty())
+						{
+							product.setCost(prices.first().text());
+						}
+					}
+
+					product.setSizes(builder.toString().toUpperCase());
+
+					product.setMetaDescription(document.select("meta[name=description]").get(0).attr("content"));
+					product.setMetaKeyword(document.select("meta[name=keywords]").first().attr("content"));
+
+					products.add(product);
+
+
+					System.out.println(product);
 				}
-
-				Elements sizesAndPriceTableRows = document.getElementsByClass("tr-offer").select(".active");
-				StringBuilder builder = new StringBuilder();
-				for(Element sizesAndPriceTableRow : sizesAndPriceTableRows)
-				{
-					Elements sizes = sizesAndPriceTableRow.getElementsByClass("size-label__body");
-					if(!sizes.isEmpty())
-					{
-						builder.append(sizes.first().text()).append(" ");
-					}
-				}
-				if (!sizesAndPriceTableRows.isEmpty())
-				{
-					Elements prices = sizesAndPriceTableRows.first().getElementsByClass("itemPrice");
-					if(prices != null && !prices.isEmpty())
-					{
-						product.setCost(prices.first().text());
-					}
-				}
-
-				product.setSizes(builder.toString().toUpperCase());
-
-				product.setMetaDescription(document.select("meta[name=description]").get(0).attr("content"));
-				product.setMetaKeyword(document.select("meta[name=keywords]").first().attr("content"));
-
-				products.add(product);
-
-
-				System.out.println(product);
+				result.put(category, products);
 			}
-			result.put(category, products);
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Error in Mondigo worker!", e);
 		}
 		return result;
 	}
@@ -220,7 +229,11 @@ public class MondigoWorker extends GenericScriblingWorker
 	protected String parseImageUrl(Document document)
 	{
 		Element image = document.getElementById("img-zoom");
-		return SITE_URL + image.attr("src");
+		if(image != null)
+		{
+			return SITE_URL + image.attr("src");
+		}
+		return "";
 	}
 
 	@Override
@@ -238,7 +251,7 @@ public class MondigoWorker extends GenericScriblingWorker
 	@Override
 	protected BigDecimal createPrice(Product product, boolean onOption)
 	{
-		BigDecimal finalPrice = new BigDecimal(product.getCost()).multiply(BigDecimal.valueOf(252)).multiply(KOEF_FOR_OPT).multiply(BigDecimal.valueOf(1.23));
+		BigDecimal finalPrice = new BigDecimal(product.getCost()).multiply(BigDecimal.valueOf(258)).multiply(KOEF_FOR_OPT).multiply(BigDecimal.valueOf(1.23));
 		BigDecimal setScale = finalPrice.divide(BigDecimal.valueOf(1000));
 		BigDecimal bigDecimal = setScale.setScale(0, BigDecimal.ROUND_HALF_UP);
 		return bigDecimal.multiply(BigDecimal.valueOf(1000));

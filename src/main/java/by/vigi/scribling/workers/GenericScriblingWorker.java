@@ -6,6 +6,7 @@ import by.vigi.service.OptionValueService;
 import by.vigi.service.ProductOptionService;
 import by.vigi.service.ProductService;
 import by.vigi.utils.FileDownloader;
+import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -22,6 +23,9 @@ import java.util.stream.Collectors;
  */
 public abstract class GenericScriblingWorker implements Runnable
 {
+
+	protected final static Logger LOGGER = Logger.getLogger(GenericScriblingWorker.class);
+
 	public static final int OPT_KOEF = 1;
 	public static final int ROZNICA_KOEF = 2;
 	protected boolean forOpt = false;
@@ -95,18 +99,22 @@ public abstract class GenericScriblingWorker implements Runnable
 					{
 						for (Product product : products)
 						{
-							if (product.getArticle().equals(article))
+							if (article.equals(product.getArticle()))
 							{
 								product.setAlreadyUsed(true);
 								entity.setQuantity(20);
-								updateOptions(entity,product, productOptionService);
-								entity.setPrice(createPrice(product, false));
+								if(product.getCost() != null)
+								{
+									updateOptions(entity, product, productOptionService);
+									entity.setPrice(createPrice(product, false));
+								}
 								entity.setDateModified(new Timestamp(System.currentTimeMillis()));
 							}
 						}
 					}
 					if (!isDateToday(entity.getDateModified().getTime()))
 					{
+						//LOGGER.info("Product with article " + );
 						entity.setQuantity(0);
 					}
 				}
@@ -114,23 +122,64 @@ public abstract class GenericScriblingWorker implements Runnable
 			}
 			else
 			{
+				LOGGER.info("Create new category by name " + categoryName);
 				category = categoryService.createCategory(categoryName);
 			}
 
 			List<Product> newProducts = products.stream().filter(product -> !product.isAlreadyUsed()).collect(Collectors.toList());
-			startImportNewProducts(newProducts, category, productService, categoryService,productOptionService, true);
+			LOGGER.info(newProducts.size() + " new products will be added ");
+			startImportNewProducts(newProducts, category, productService, categoryService, productOptionService, true);
 		}
 	}
 
 	private void updateOptions(ProductEntity entity, Product product, ProductOptionService productOptionService)
 	{
 		Collection<ProductOptionValueEntity> optionsForUpdate = productOptionService.findByProductId(entity.getProductId());
-		for (ProductOptionValueEntity productOptionValueEntity : optionsForUpdate)
+		if(product.getCost() != null)
 		{
-			productOptionValueEntity.setPrice(createPrice(product, false));
-			productOptionValueEntity.setPricePrefix("+");
-			productOptionService.updateProductOptionValue(productOptionValueEntity);
+			for (ProductOptionValueEntity productOptionValueEntity : optionsForUpdate)
+			{
+				productOptionValueEntity.setPrice(createPrice(product, false));
+				productOptionValueEntity.setPricePrefix("+");
+			}
 		}
+
+		if(product.getSizes() != null)
+		{
+			for(ProductOptionValueEntity productOptionValue : optionsForUpdate)
+			{
+				productOptionValue.setQuantity(0);
+			}
+			List<String> sizes = parseSizes(product.getSizes());
+			//TODO : Use iterator for remove
+			for (String size : sizes)
+			{
+				Integer sizeId = sizeOnOptionIdValue.get(size);
+				if(sizeOnOptionIdValue != null)
+				{
+					//ProductOptionValueEntity productOptionValueEntity = optionsForUpdate.stream().filter(optionValue -> optionValue.getOptionValueId().equals(sizeId)).findFirst().get();
+					for (ProductOptionValueEntity productOptionValueEntity : optionsForUpdate)
+					{
+						if(productOptionValueEntity.getOptionValueId().equals(sizeId))
+						{
+							productOptionValueEntity.setQuantity(40);
+						}
+					}
+				}
+				//TODO: remove processed sizes and add new product options
+			}
+			if(sizes.size() != optionsForUpdate.size())
+			{
+				LOGGER.info("Count sizes for product " + entity.getModel() + " changed. New size count = " + sizes.size()
+						+ ", old sizes count " +  optionsForUpdate.size());
+			}
+
+		}
+		for(ProductOptionValueEntity productOptionValue : optionsForUpdate)
+		{
+			productOptionService.updateProductOptionValue(productOptionValue);
+		}
+
 	}
 
 	protected synchronized void startImportNewProducts(List<Product> newProducts, CategoryEntity category, ProductService productService, CategoryService categoryService, ProductOptionService productOptionService, boolean imageWillBeDownloaded)
@@ -143,15 +192,15 @@ public abstract class GenericScriblingWorker implements Runnable
 			}
 			ProductEntity productEntity = productService.createNewProductEntity();
 
-			if(forOpt && currentMargin == OPT_KOEF)
+			/*if(forOpt && currentMargin == OPT_KOEF)
 			{
 				List<String> sizes = parseSizes(product.getSizes());
 				productEntity.setModel(product.getArticle() + " Продается упаковками по " + sizes.size() + " шт. " + sizes.get(0) + "-" + sizes.get(sizes.size() - 1) + " размеров " );
 			}
 			else
 			{
-				productEntity.setModel(product.getArticle());
-			}
+			}*/
+			productEntity.setModel(product.getArticle());
 			productEntity.setStatus(true);
 			productEntity.setQuantity(20);
 			productEntity.getCategories().add(category);

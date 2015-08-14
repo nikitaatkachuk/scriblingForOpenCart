@@ -7,10 +7,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Created by Nikita Tkachuk
@@ -29,7 +27,9 @@ public class AlltextileWorker extends GenericScriblingWorker
 
 	protected Map<String, String> parseCategoryLinks() throws IOException
 	{
-		Document document = Jsoup.connect("http://alltextile.info/").get();
+		LOGGER.info("Start Alltextile worker");
+
+		Document document = Jsoup.connect("http://alltextile.info/").timeout(10 * 100000).get();
 		Elements elements = document.select("a");
 		Elements categoryLink = new Elements();
 		for (Element element : elements)
@@ -57,7 +57,7 @@ public class AlltextileWorker extends GenericScriblingWorker
 		{
 			String category = entry.getKey();
 			String url = entry.getValue();
-			Document document = Jsoup.connect(url).get();
+			Document document = Jsoup.connect(url).timeout(10 * 100000).get();
 			Elements elements = document.select("a");
 			Elements productElements = new Elements();
 			for (Element element : elements)
@@ -96,7 +96,7 @@ public class AlltextileWorker extends GenericScriblingWorker
 			{
 				try
 				{
-					Document document = Jsoup.connect(url).get();
+					Document document = Jsoup.connect(url).timeout(10 * 100000).get();
 					Elements elements = document.getElementsByClass("product_desc");
 					if(!elements.isEmpty())
 					{
@@ -120,12 +120,12 @@ public class AlltextileWorker extends GenericScriblingWorker
 						product.setUrl(imageElement.attr("src"));
 
 						product.setSizes(document.getElementsByClass("inputboxattrib").first().text());
-						System.out.println(product.toString());
 					}
 				}
 				catch (Exception e)
 				{
 					System.out.println(e.getMessage());
+					LOGGER.error("Exception in Alltextile thread! ", e);
 				}
 			}
 			result.put(category, products);
@@ -184,6 +184,15 @@ public class AlltextileWorker extends GenericScriblingWorker
 			result.setComposite(mainInformation.substring(lastDot));
 		}
 		return result;
+	}
+
+	@Override
+	protected BigDecimal createPrice(Product product, boolean onOption)
+	{
+		BigDecimal finalPrice = new BigDecimal(product.getCost()).multiply(RUSSION_RUBLE_COURSE).multiply(KOEF_FOR_OPT).multiply(KOEF_FOR_OPT);
+		BigDecimal setScale = finalPrice.divide(BigDecimal.valueOf(1000));
+		BigDecimal bigDecimal = setScale.setScale(0, BigDecimal.ROUND_HALF_UP);
+		return bigDecimal.multiply(BigDecimal.valueOf(1000));
 	}
 
 	@Override
