@@ -156,11 +156,9 @@ public abstract class GenericScriblingWorker implements Runnable
 				LOGGER.info("Count sizes for product " + entity.getModel() + " changed. New size count = " + sizes.size()
 						+ ", old sizes count " +  optionsForUpdate.size());
 			}
-			//TODO : Use iterator for remove
-			Iterator<String> iterator = sizes.iterator();
-			while (iterator.hasNext())
+			List<String> usedSize = new ArrayList<>();
+			for (String size : sizes)
 			{
-				String size = iterator.next();
 				Integer sizeId = sizeOnOptionIdValue.get(size);
 				if (sizeOnOptionIdValue != null)
 				{
@@ -170,25 +168,33 @@ public abstract class GenericScriblingWorker implements Runnable
 						if (productOptionValueEntity.getOptionValueId().equals(sizeId))
 						{
 							productOptionValueEntity.setQuantity(40);
-							iterator.remove();
+							usedSize.add(size);
+							break;
 						}
 					}
 				}
-				//TODO: remove processed sizes and add new product options
 			}
-			if(sizes.size() > 0)
+			if(usedSize.size() != sizes.size())
 			{
+
 				//Add new option
 				for (String size : sizes)
 				{
-					ProductOptionValueEntity newProductOptionValue = makeNewProductOptionValueEntity(product, entity,
-							optionsForUpdate.iterator().next().getProductOptionId(), size);
-					productOptionService.updateProductOptionValue(newProductOptionValue);
+					if(!usedSize.contains(size))
+					{
+						if(!optionsForUpdate.isEmpty())
+						{
+							Integer productOptionId = optionsForUpdate.iterator().next().getProductOptionId();
+							ProductOptionValueEntity newProductOptionValue = makeNewProductOptionValueEntity(product, entity,
+									productOptionId, size);
+							if(newProductOptionValue != null)
+							{
+								productOptionService.createProductOptionValue(newProductOptionValue);
+							}
+						}
+					}
 				}
 			}
-
-
-
 		}
 		for(ProductOptionValueEntity productOptionValue : optionsForUpdate)
 		{
@@ -369,6 +375,7 @@ public abstract class GenericScriblingWorker implements Runnable
 		Integer optionValueId = sizeOnOptionIdValue.get(size);
 		if (optionValueId == null)
 		{
+			LOGGER.warn("Don't find size " + size);
 			return null;
 		}
 		productOptionValue.setOptionValueId(optionValueId);

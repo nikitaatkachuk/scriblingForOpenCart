@@ -36,11 +36,11 @@ public class Main
 		{
 			System.out.println("Parse for opt");
 			//Thread mariMay = new Thread(new MarimayWorker(true, 1));
-			//Thread allTextile = new Thread(new AlltextileWorker(false, 1));
-			Thread mondigoThread = new Thread(new MondigoWorker());
+			Thread allTextile = new Thread(new AlltextileWorker());
+			//Thread mondigoThread = new Thread(new MondigoWorker());
 			//mariMay.start();
-			//allTextile.start();
-			mondigoThread.start();
+			allTextile.start();
+			//mondigoThread.start();
 		}
 		else
 		{
